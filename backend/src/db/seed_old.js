@@ -172,27 +172,76 @@ const seedProducts = [
     stock: 40
   }
 ];
+    category: "Kitchen",
+    stock: 80
+  },
+  {
+    name: "LED Desk Lamp",
+    price: 45.99,
+    image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500&h=500&fit=crop",
+    description: "Adjustable LED desk lamp with USB charging port and touch controls.",
+    category: "Home",
+    stock: 40
+  },
+  {
+    name: "Wireless Charging Pad",
+    price: 25.99,
+    image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=500&h=500&fit=crop",
+    description: "Fast wireless charging pad compatible with all Qi-enabled devices.",
+    category: "Electronics",
+    stock: 90
+  },
+  {
+    name: "Canvas Backpack",
+    price: 54.99,
+    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop",
+    description: "Durable canvas backpack with multiple compartments and laptop sleeve.",
+    category: "Accessories",
+    stock: 35
+  },
+  {
+    name: "Essential Oil Diffuser",
+    price: 34.99,
+    image: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5c?w=500&h=500&fit=crop",
+    description: "Ultrasonic essential oil diffuser with LED lights and timer settings.",
+    category: "Home",
+    stock: 55
+  }
+];
 
 const seedDatabase = async () => {
+  // Only connect/close if we weren't already connected
+  const wasDisconnected = mongoose.connection.readyState === 0; // 0 = disconnected
   try {
-    // Check if products already exist
-    const existingProducts = await Product.countDocuments();
-    
-    if (existingProducts > 0) {
-      console.log(`Database already has ${existingProducts} products. Clearing and re-seeding with new products.`);
-      // Clear existing products and re-seed with new ones
-      await Product.deleteMany({});
+    if (wasDisconnected) {
+      await mongoose.connect(process.env.MONGO_URI);
+      console.log('Connected to MongoDB (seed)');
     }
 
-    // Insert new products
-    const createdProducts = await Product.insertMany(seedProducts);
-    console.log(`✅ Successfully seeded ${createdProducts.length} products to the database`);
+    // Check if products already exist
+    const existingProducts = await Product.countDocuments();
+    if (existingProducts > 0) {
+      console.log(`Database already has ${existingProducts} products. Skipping seed.`);
+      return;
+    }
+
+    // Insert seed products
+    await Product.insertMany(seedProducts);
+    console.log('Database seeded successfully with products!');
     
-    return createdProducts;
   } catch (error) {
-    console.error('❌ Error seeding database:', error);
-    throw error;
+    console.error('Error seeding database:', error);
+  } finally {
+    if (wasDisconnected) {
+      await mongoose.connection.close();
+      console.log('Closed MongoDB connection (seed)');
+    }
   }
 };
 
-module.exports = { seedDatabase, seedProducts };
+// Run seed if called directly
+if (require.main === module) {
+  seedDatabase();
+}
+
+module.exports = seedDatabase;

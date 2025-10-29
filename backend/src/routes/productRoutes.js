@@ -1,7 +1,12 @@
 const express = require('express');
-const { getProducts, getProductById } = require('../controllers/productController');
+const { getProducts, getProductById, getCategories } = require('../controllers/productController');
 
 const router = express.Router();
+
+// @route   GET /api/products/categories
+// @desc    Get all categories
+// @access  Public
+router.get('/categories', getCategories);
 
 // @route   GET /api/products
 // @desc    Get all products

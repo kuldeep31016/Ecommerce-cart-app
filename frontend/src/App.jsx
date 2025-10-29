@@ -6,6 +6,8 @@ import Navbar from './components/Navbar';
 import ProductsPage from './pages/ProductsPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
+import CategoryPage from './pages/CategoryPage';
+import AboutPage from './pages/AboutPage';
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
@@ -16,8 +18,10 @@ function App() {
           <Navbar />
           <Routes>
             <Route path="/" element={<ProductsPage />} />
+            <Route path="/category/:categoryName" element={<CategoryPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/about" element={<AboutPage />} />
           </Routes>
           
           {/* Toast Container */}

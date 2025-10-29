@@ -79,10 +79,10 @@ const Navbar = () => {
               </button>
               <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="py-1">
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Men's Clothing</a>
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Women's Clothing</a>
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Electronics</a>
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Jewelry</a>
+                  <Link to="/category/men's clothing" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Men's Clothing</Link>
+                  <Link to="/category/women's clothing" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Women's Clothing</Link>
+                  <Link to="/category/electronics" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Electronics</Link>
+                  <Link to="/category/jewelery" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Jewelry</Link>
                 </div>
               </div>
             </div>
