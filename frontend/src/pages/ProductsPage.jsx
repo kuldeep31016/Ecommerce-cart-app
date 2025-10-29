@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { productsAPI, fallbackAPI } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import { toast } from 'react-toastify';
@@ -9,7 +9,13 @@ const ProductsPage = () => {
   const [error, setError] = useState(null);
   const [usingFallback, setUsingFallback] = useState(false);
 
+  // Prevent double-fetch in React 18 StrictMode (dev)
+  const didFetchRef = useRef(false);
+  const notifiedFallbackRef = useRef(false);
+
   useEffect(() => {
+    if (didFetchRef.current) return;
+    didFetchRef.current = true;
     fetchProducts();
   }, []);
 
@@ -41,7 +47,10 @@ const ProductsPage = () => {
         
         setProducts(fallbackProducts);
         setUsingFallback(true);
-        toast.info('Using demo data - backend unavailable');
+        if (!notifiedFallbackRef.current) {
+          toast.info('Using demo data - backend unavailable');
+          notifiedFallbackRef.current = true;
+        }
         
       } catch (fallbackError) {
         console.error('Both APIs failed:', fallbackError);

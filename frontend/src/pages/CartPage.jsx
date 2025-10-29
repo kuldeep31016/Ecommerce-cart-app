@@ -8,7 +8,7 @@ const CartPage = () => {
 
   useEffect(() => {
     fetchCart();
-  }, []);
+  }, []); // Empty dependency array - only run once on mount
 
   const handleClearCart = async () => {
     if (window.confirm('Are you sure you want to clear your cart?')) {

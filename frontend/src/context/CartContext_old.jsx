@@ -15,18 +15,21 @@ const CART_ACTIONS = {
   SET_LOADING: 'SET_LOADING',
   SET_ERROR: 'SET_ERROR',
   SET_CART: 'SET_CART',
+  ADD_ITEM: 'ADD_ITEM',
+  UPDATE_ITEM: 'UPDATE_ITEM',
+  REMOVE_ITEM: 'REMOVE_ITEM',
   CLEAR_CART: 'CLEAR_CART',
 };
 
-// Helper function to calculate total
-const calculateTotal = (items) => {
-  return items.reduce((total, item) => {
-    return total + (item.productId.price * item.qty);
-  }, 0);
-};
-
-// Reducer function
+// Reducer
 const cartReducer = (state, action) => {
+  const calculateTotal = (items) => {
+    const total = items.reduce((sum, item) => {
+      return sum + (item.productId?.price || 0) * (item.qty || 0);
+    }, 0);
+    return Math.round(total * 100) / 100;
+  };
+
   switch (action.type) {
     case CART_ACTIONS.SET_LOADING:
       return {
@@ -52,13 +55,53 @@ const cartReducer = (state, action) => {
         error: null,
       };
 
+    case CART_ACTIONS.ADD_ITEM:
+      const existingItem = state.items.find(
+        item => item.productId._id === action.payload.productId._id
+      );
+
+      let newItems;
+      if (existingItem) {
+        newItems = state.items.map(item =>
+          item.productId._id === action.payload.productId._id
+            ? { ...item, qty: item.qty + action.payload.qty }
+            : item
+        );
+      } else {
+        newItems = [...state.items, action.payload];
+      }
+
+      return {
+        ...state,
+        items: newItems,
+        total: calculateTotal(newItems),
+      };
+
+    case CART_ACTIONS.UPDATE_ITEM:
+      const updatedItems = state.items.map(item =>
+        item._id === action.payload._id ? action.payload : item
+      );
+
+      return {
+        ...state,
+        items: updatedItems,
+        total: calculateTotal(updatedItems),
+      };
+
+    case CART_ACTIONS.REMOVE_ITEM:
+      const filteredItems = state.items.filter(item => item._id !== action.payload);
+
+      return {
+        ...state,
+        items: filteredItems,
+        total: calculateTotal(filteredItems),
+      };
+
     case CART_ACTIONS.CLEAR_CART:
       return {
         ...state,
-        loading: false,
         items: [],
         total: 0,
-        error: null,
       };
 
     default:
@@ -82,7 +125,7 @@ export const useCart = () => {
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
-  // Fetch cart data - SIMPLIFIED VERSION
+  // Fetch cart data
   const fetchCart = useCallback(async () => {
     try {
       dispatch({ type: CART_ACTIONS.SET_LOADING, payload: true });
@@ -100,13 +143,13 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // Add item to cart - SIMPLIFIED VERSION
+  // Add item to cart
   const addToCart = useCallback(async (productId, qty = 1) => {
     try {
       dispatch({ type: CART_ACTIONS.SET_LOADING, payload: true });
       const response = await cartAPI.add(productId, qty);
       
-      // Just update with the response data directly
+      // Update state directly instead of calling fetchCart to avoid circular dependency
       dispatch({
         type: CART_ACTIONS.SET_CART,
         payload: response.data,
@@ -121,18 +164,17 @@ export const CartProvider = ({ children }) => {
       toast.error(message);
       throw error;
     }
-  }, []);
+  }, []); // Removed fetchCart dependency
 
-  // Update cart item quantity - SIMPLIFIED VERSION
+  // Update cart item quantity
   const updateCartItem = useCallback(async (itemId, qty) => {
     try {
       dispatch({ type: CART_ACTIONS.SET_LOADING, payload: true });
       const response = await cartAPI.update(itemId, qty);
       
-      // Update with fresh cart data
       dispatch({
-        type: CART_ACTIONS.SET_CART,
-        payload: response.data,
+        type: CART_ACTIONS.UPDATE_ITEM,
+        payload: response.data.cartItem,
       });
       
       toast.success('Cart updated!');
@@ -146,16 +188,15 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // Remove item from cart - SIMPLIFIED VERSION
+  // Remove item from cart
   const removeFromCart = useCallback(async (itemId) => {
     try {
       dispatch({ type: CART_ACTIONS.SET_LOADING, payload: true });
-      const response = await cartAPI.remove(itemId);
+      await cartAPI.remove(itemId);
       
-      // Update with fresh cart data
       dispatch({
-        type: CART_ACTIONS.SET_CART,
-        payload: response.data,
+        type: CART_ACTIONS.REMOVE_ITEM,
+        payload: itemId,
       });
       
       toast.success('Item removed from cart!');
@@ -168,7 +209,7 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // Clear entire cart - SIMPLIFIED VERSION
+  // Clear entire cart
   const clearCart = useCallback(async () => {
     try {
       dispatch({ type: CART_ACTIONS.SET_LOADING, payload: true });
@@ -185,15 +226,17 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // Helper functions with memoization
+  // Get item count
   const getItemCount = useCallback(() => {
     return state.items.reduce((count, item) => count + item.qty, 0);
   }, [state.items]);
 
+  // Check if product is in cart
   const isInCart = useCallback((productId) => {
     return state.items.some(item => item.productId._id === productId);
   }, [state.items]);
 
+  // Get cart item by product ID
   const getCartItem = useCallback((productId) => {
     return state.items.find(item => item.productId._id === productId);
   }, [state.items]);

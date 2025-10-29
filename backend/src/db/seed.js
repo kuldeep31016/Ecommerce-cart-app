@@ -86,9 +86,13 @@ const seedProducts = [
 ];
 
 const seedDatabase = async () => {
+  // Only connect/close if we weren't already connected
+  const wasDisconnected = mongoose.connection.readyState === 0; // 0 = disconnected
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('Connected to MongoDB');
+    if (wasDisconnected) {
+      await mongoose.connect(process.env.MONGO_URI);
+      console.log('Connected to MongoDB (seed)');
+    }
 
     // Check if products already exist
     const existingProducts = await Product.countDocuments();
@@ -104,7 +108,10 @@ const seedDatabase = async () => {
   } catch (error) {
     console.error('Error seeding database:', error);
   } finally {
-    mongoose.connection.close();
+    if (wasDisconnected) {
+      await mongoose.connection.close();
+      console.log('Closed MongoDB connection (seed)');
+    }
   }
 };
 
