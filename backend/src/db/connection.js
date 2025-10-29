@@ -25,21 +25,40 @@ const connectDB = async (retries = 5, delayMs = 1000) => {
     process.exit(1);
   }
 
+  // Enhanced connection options for stability
+  const options = {
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+    maxPoolSize: 10,
+    minPoolSize: 5,
+    maxIdleTimeMS: 30000,
+  };
+
   mongoose.connection.on('connected', () => {
-    console.log(`MongoDB connected: ${mongoose.connection.host}`);
+    console.log(`MongoDB Connected: ${mongoose.connection.host}`);
   });
+  
   mongoose.connection.on('error', (err) => {
     console.error('MongoDB connection error:', err.message);
   });
+  
   mongoose.connection.on('disconnected', () => {
     console.warn('MongoDB disconnected');
+  });
+
+  // Handle process termination gracefully
+  process.on('SIGINT', async () => {
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed due to app termination');
+    process.exit(0);
   });
 
   connectingPromise = (async () => {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         console.log(`Connecting to MongoDB (${attempt}/${retries}) -> ${redactUri(uri)}`);
-        await mongoose.connect(uri);
+        await mongoose.connect(uri, options);
+        connectingPromise = null;
         return mongoose.connection;
       } catch (error) {
         console.error(`MongoDB connect failed (${attempt}):`, error.message);
