@@ -1,28 +1,36 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { toast } from 'react-toastify';
 
 const ProductCard = ({ product }) => {
   const { addToCart, isInCart, getCartItem } = useCart();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleAddToCart = async () => {
     try {
       setLoading(true);
       await addToCart(product._id, 1);
+      toast.success('Added to cart!');
     } catch (error) {
       console.error('Error adding to cart:', error);
+      toast.error('Failed to add to cart');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleQuickView = () => {
+    // Navigate to product detail page
+    navigate(`/product/${product._id}`);
   };
 
   const cartItem = getCartItem(product._id);
   const inCart = isInCart(product._id);
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 flex flex-col h-full">
       {/* Product Image with Enhanced Styling */}
       <div className="relative aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent z-10"></div>
@@ -68,14 +76,14 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* Product Details with Enhanced Layout */}
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-grow">
         {/* Product Name with Better Typography */}
-        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight">
+        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight h-14">
           {product.name}
         </h3>
 
         {/* Product Description */}
-        <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+        <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed h-10">
           {product.description || 'High-quality product with excellent features and durability.'}
         </p>
 
@@ -116,60 +124,63 @@ const ProductCard = ({ product }) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 space-y-3">
-          {inCart ? (
-            <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3">
-              <div className="flex items-center text-green-700">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                In Cart ({cartItem?.qty})
-              </div>
-              <Link
-                to="/cart"
-                className="text-green-600 hover:text-green-700 font-medium text-sm transition-colors"
-              >
-                View Cart
-              </Link>
-            </div>
-          ) : (
-            <button
-              onClick={handleAddToCart}
-              disabled={loading || product.stock === 0}
-              className={`w-full px-4 py-3 rounded-lg font-medium flex items-center justify-center group transition-all duration-200 ${
-                product.stock === 0
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : loading
-                  ? 'bg-primary-400 text-white cursor-not-allowed'
-                  : 'bg-primary-600 text-white hover:bg-primary-700'
-              }`}
+        <div className="mt-auto pt-4">
+          {/* Quick View and Add to Cart buttons */}
+          <div className="grid grid-cols-2 gap-2">
+            <button 
+              onClick={handleQuickView}
+              className="w-full bg-white text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium flex items-center justify-center border-2 border-gray-300 hover:border-gray-400"
             >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Adding...
-                </div>
-              ) : product.stock === 0 ? (
-                'Out of Stock'
-              ) : (
-                <div className="flex items-center">
-                  <svg className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-                  </svg>
-                  Add to Cart
-                </div>
-              )}
-            </button>
-          )}
-
-          {/* Quick view and compare buttons */}
-          <div className="flex space-x-2">
-            <button className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+              <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
               Quick View
             </button>
-            <button className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
-              Compare
-            </button>
+            
+            {inCart ? (
+              <Link
+                to="/cart"
+                className="w-full bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center shadow-md"
+              >
+                <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                In Cart
+              </Link>
+            ) : (
+              <button
+                onClick={handleAddToCart}
+                disabled={loading || product.stock === 0}
+                style={{
+                  backgroundColor: product.stock === 0 ? '#d1d5db' : loading ? '#fb923c' : '#f97316',
+                  color: 'white'
+                }}
+                className={`w-full px-3 py-1.5 rounded-lg font-semibold text-sm flex items-center justify-center transition-all duration-200 shadow-md ${
+                  product.stock === 0
+                    ? 'cursor-not-allowed'
+                    : loading
+                    ? 'cursor-not-allowed'
+                    : 'hover:brightness-110 active:brightness-90'
+                }`}
+              >
+                {loading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white mr-1.5"></div>
+                    Adding...
+                  </div>
+                ) : product.stock === 0 ? (
+                  'Out of Stock'
+                ) : (
+                  <>
+                    <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                    </svg>
+                    Add to Cart
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
