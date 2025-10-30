@@ -37,10 +37,11 @@ const AboutPage = () => {
             </div>
             <div className="relative">
               <img 
-                src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600&h=400&fit=crop" 
-                alt="Our team" 
+                src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop&q=80" 
+                alt="Modern e-commerce shopping experience" 
                 className="rounded-lg shadow-lg"
               />
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary-600/20 to-transparent rounded-lg"></div>
             </div>
           </div>
         </div>

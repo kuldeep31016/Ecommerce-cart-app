@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { productsAPI } from '../services/api';
 
 const Navbar = () => {
   const { getItemCount, total } = useCart();
@@ -9,6 +10,39 @@ const Navbar = () => {
   const itemCount = getItemCount();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [allProducts, setAllProducts] = useState([]);
+
+  // Fetch products for suggestions
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await productsAPI.getAll();
+        setAllProducts(response.data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // Update suggestions when search query changes
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      const filtered = allProducts
+        .filter(product => 
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.category.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .slice(0, 5); // Show max 5 suggestions
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchQuery, allProducts]);
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -22,7 +56,14 @@ const Navbar = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+      setShowSuggestions(false);
     }
+  };
+
+  const handleSuggestionClick = (product) => {
+    setSearchQuery('');
+    setShowSuggestions(false);
+    navigate(`/product/${product._id}`);
   };
 
   return (
@@ -30,10 +71,10 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
-          <div className="flex items-center">
+          <div className="flex items-center mr-8">
             <Link 
               to="/" 
-              className="flex items-center text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors"
+              className="flex items-center text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors whitespace-nowrap"
             >
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center mr-2">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,9 +86,9 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="relative">
+          <div className="hidden md:flex items-center space-x-6 flex-1">
+            {/* Search Bar with Autocomplete */}
+            <form onSubmit={handleSearch} className="relative flex-1 max-w-md">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -58,8 +99,38 @@ const Navbar = () => {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent w-64"
+                onFocus={() => searchQuery && setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
+              
+              {/* Suggestions Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+                  {suggestions.map((product) => (
+                    <button
+                      key={product._id}
+                      type="button"
+                      onClick={() => handleSuggestionClick(product)}
+                      className="w-full px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-left border-b border-gray-100 last:border-b-0"
+                    >
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        className="w-12 h-12 object-cover rounded"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/48x48?text=No+Image';
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                        <p className="text-xs text-gray-500 capitalize">{product.category}</p>
+                      </div>
+                      <p className="text-sm font-semibold text-primary-600">${product.price}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
             </form>
 
             {/* Navigation Links */}

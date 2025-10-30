@@ -8,13 +8,16 @@ const getCart = async (req, res) => {
   try {
     const cartItems = await CartItem.find({ userId: 'guest' }).populate('productId');
     
+    // Filter out items with null productId (deleted products)
+    const validCartItems = cartItems.filter(item => item.productId != null);
+    
     // Calculate total
-    const total = cartItems.reduce((sum, item) => {
+    const total = validCartItems.reduce((sum, item) => {
       return sum + (item.productId.price * item.qty);
     }, 0);
 
     res.json({
-      cartItems,
+      cartItems: validCartItems,
       total: Math.round(total * 100) / 100 // Round to 2 decimal places
     });
   } catch (error) {
@@ -55,12 +58,6 @@ const addToCart = async (req, res) => {
       // Update quantity
       existingCartItem.qty += parseInt(qty);
       await existingCartItem.save();
-      const populatedItem = await CartItem.findById(existingCartItem._id).populate('productId');
-      
-      res.json({
-        message: 'Cart item updated successfully',
-        cartItem: populatedItem
-      });
     } else {
       // Create new cart item
       const cartItem = new CartItem({
@@ -68,15 +65,24 @@ const addToCart = async (req, res) => {
         qty: parseInt(qty),
         userId: 'guest'
       });
-
       await cartItem.save();
-      const populatedItem = await CartItem.findById(cartItem._id).populate('productId');
-      
-      res.status(201).json({
-        message: 'Item added to cart successfully',
-        cartItem: populatedItem
-      });
     }
+
+    // Return full cart data
+    const cartItems = await CartItem.find({ userId: 'guest' }).populate('productId');
+    
+    // Filter out items with null productId (deleted products)
+    const validCartItems = cartItems.filter(item => item.productId != null);
+    
+    const total = validCartItems.reduce((sum, item) => {
+      return sum + (item.productId.price * item.qty);
+    }, 0);
+
+    res.json({
+      message: existingCartItem ? 'Cart item updated successfully' : 'Item added to cart successfully',
+      cartItems: validCartItems,
+      total: Math.round(total * 100) / 100
+    });
   } catch (error) {
     console.error('Error adding to cart:', error);
     if (error.name === 'CastError') {
@@ -111,11 +117,20 @@ const updateCartItem = async (req, res) => {
     cartItem.qty = parseInt(qty);
     await cartItem.save();
     
-    const populatedItem = await CartItem.findById(cartItem._id).populate('productId');
+    // Return full cart data
+    const cartItems = await CartItem.find({ userId: 'guest' }).populate('productId');
+    
+    // Filter out items with null productId (deleted products)
+    const validCartItems = cartItems.filter(item => item.productId != null);
+    
+    const total = validCartItems.reduce((sum, item) => {
+      return sum + (item.productId.price * item.qty);
+    }, 0);
 
     res.json({
       message: 'Cart item updated successfully',
-      cartItem: populatedItem
+      cartItems: validCartItems,
+      total: Math.round(total * 100) / 100
     });
   } catch (error) {
     console.error('Error updating cart item:', error);
@@ -142,7 +157,21 @@ const removeFromCart = async (req, res) => {
 
     await CartItem.findByIdAndDelete(req.params.id);
 
-    res.json({ message: 'Item removed from cart successfully' });
+    // Return full cart data
+    const cartItems = await CartItem.find({ userId: 'guest' }).populate('productId');
+    
+    // Filter out items with null productId (deleted products)
+    const validCartItems = cartItems.filter(item => item.productId != null);
+    
+    const total = validCartItems.reduce((sum, item) => {
+      return sum + (item.productId.price * item.qty);
+    }, 0);
+
+    res.json({
+      message: 'Item removed from cart successfully',
+      cartItems: validCartItems,
+      total: Math.round(total * 100) / 100
+    });
   } catch (error) {
     console.error('Error removing from cart:', error);
     if (error.name === 'CastError') {

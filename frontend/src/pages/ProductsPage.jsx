@@ -149,13 +149,13 @@ const ProductsPage = () => {
         {categories.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-center">
-              <div className="inline-flex items-center space-x-2 bg-white rounded-lg shadow-md p-2">
+              <div className="inline-flex flex-wrap items-center gap-2 bg-white rounded-lg shadow-md p-3">
                 <button
                   onClick={() => setSelectedCategory('all')}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                     selectedCategory === 'all'
-                      ? 'bg-primary-600 text-white shadow-sm'
-                      : 'text-gray-600 hover:bg-gray-100'
+                      ? 'bg-primary-600 text-white shadow-md ring-2 ring-primary-300'
+                      : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
                   }`}
                 >
                   All Products ({allProducts.length})
@@ -168,8 +168,8 @@ const ProductsPage = () => {
                       onClick={() => setSelectedCategory(category)}
                       className={`px-4 py-2 rounded-md text-sm font-medium transition-all capitalize ${
                         selectedCategory === category
-                          ? 'bg-primary-600 text-white shadow-sm'
-                          : 'text-gray-600 hover:bg-gray-100'
+                          ? 'bg-primary-600 text-white shadow-md ring-2 ring-primary-300'
+                          : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
                       }`}
                     >
                       {category} ({count})
