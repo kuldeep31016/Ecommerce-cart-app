@@ -5,6 +5,9 @@ import { toast } from 'react-toastify';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]); // Store all products for filtering
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [backendStatus, setBackendStatus] = useState('checking'); // 'checking', 'connected', 'disconnected'
@@ -15,18 +18,33 @@ const ProductsPage = () => {
   useEffect(() => {
     if (didFetchRef.current) return;
     didFetchRef.current = true;
-    fetchProducts();
+    fetchProductsAndCategories();
   }, []);
 
-  const fetchProducts = async () => {
+  // Filter products when category changes
+  useEffect(() => {
+    if (selectedCategory === 'all') {
+      setProducts(allProducts);
+    } else {
+      setProducts(allProducts.filter(product => product.category === selectedCategory));
+    }
+  }, [selectedCategory, allProducts]);
+
+  const fetchProductsAndCategories = async () => {
     try {
       setLoading(true);
       setError(null);
       setBackendStatus('checking');
       
-      // Try to fetch from our backend
-      const response = await productsAPI.getAll();
-      setProducts(response.data);
+      // Fetch both products and categories
+      const [productsResponse, categoriesResponse] = await Promise.all([
+        productsAPI.getAll(),
+        productsAPI.getCategories()
+      ]);
+      
+      setAllProducts(productsResponse.data);
+      setProducts(productsResponse.data);
+      setCategories(categoriesResponse.data || []);
       setBackendStatus('connected');
       toast.success('✅ Connected to Vibe Commerce backend!');
       
@@ -35,6 +53,8 @@ const ProductsPage = () => {
       setError('Unable to connect to Vibe Commerce backend. Please make sure the backend server is running on port 5001.');
       setBackendStatus('disconnected');
       setProducts([]);
+      setAllProducts([]);
+      setCategories([]);
       toast.error('❌ Backend server not available. Please start the backend server.');
     } finally {
       setLoading(false);
@@ -42,7 +62,7 @@ const ProductsPage = () => {
   };
 
   const handleRetry = () => {
-    fetchProducts();
+    fetchProductsAndCategories();
   };
 
   if (loading) {
@@ -90,7 +110,7 @@ const ProductsPage = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Discover Amazing Products
           </h1>
@@ -101,11 +121,47 @@ const ProductsPage = () => {
           {backendStatus === 'connected' && (
             <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-md max-w-md mx-auto">
               <p className="text-sm text-green-800">
-                ✅ Connected to Vibe Commerce backend ({products.length} products)
+                ✅ Connected to Vibe Commerce backend ({allProducts.length} products)
               </p>
             </div>
           )}
         </div>
+
+        {/* Category Filter */}
+        {categories.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-center">
+              <div className="inline-flex items-center space-x-2 bg-white rounded-lg shadow-md p-2">
+                <button
+                  onClick={() => setSelectedCategory('all')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                    selectedCategory === 'all'
+                      ? 'bg-primary-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  All Products ({allProducts.length})
+                </button>
+                {categories.map((category) => {
+                  const count = allProducts.filter(p => p.category === category).length;
+                  return (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all capitalize ${
+                        selectedCategory === category
+                          ? 'bg-primary-600 text-white shadow-sm'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      {category} ({count})
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Products Grid */}
         {products.length > 0 ? (
@@ -121,8 +177,12 @@ const ProductsPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Products Available</h3>
-            <p className="text-gray-600">Check back later for new products.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {selectedCategory === 'all' ? 'No Products Available' : `No products in "${selectedCategory}"`}
+            </h3>
+            <p className="text-gray-600">
+              {selectedCategory === 'all' ? 'Check back later for new products.' : 'Try selecting a different category.'}
+            </p>
           </div>
         )}
 
@@ -131,6 +191,7 @@ const ProductsPage = () => {
           <div className="mt-12 text-center">
             <p className="text-gray-600">
               Showing {products.length} product{products.length !== 1 ? 's' : ''}
+              {selectedCategory !== 'all' && ` in "${selectedCategory}"`}
             </p>
           </div>
         )}

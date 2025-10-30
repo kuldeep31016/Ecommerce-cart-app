@@ -129,7 +129,7 @@ const ProductCard = ({ product }) => {
           <div className="grid grid-cols-2 gap-2">
             <button 
               onClick={handleQuickView}
-              className="w-full bg-white text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium flex items-center justify-center border-2 border-gray-300 hover:border-gray-400"
+              className="w-full bg-white text-gray-700 px-3 py-1 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium flex items-center justify-center border-2 border-gray-300 hover:border-gray-400"
             >
               <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -141,7 +141,7 @@ const ProductCard = ({ product }) => {
             {inCart ? (
               <Link
                 to="/cart"
-                className="w-full bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center shadow-md"
+                className="w-full bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center shadow-md"
               >
                 <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -156,7 +156,7 @@ const ProductCard = ({ product }) => {
                   backgroundColor: product.stock === 0 ? '#d1d5db' : loading ? '#fb923c' : '#f97316',
                   color: 'white'
                 }}
-                className={`w-full px-3 py-1.5 rounded-lg font-semibold text-sm flex items-center justify-center transition-all duration-200 shadow-md ${
+                className={`w-full px-3 py-1 rounded-lg font-semibold text-sm flex items-center justify-center transition-all duration-200 shadow-md ${
                   product.stock === 0
                     ? 'cursor-not-allowed'
                     : loading
