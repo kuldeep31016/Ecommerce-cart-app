@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { productsAPI, fallbackAPI } from '../services/api';
+import { productsAPI } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import { toast } from 'react-toastify';
 
@@ -7,11 +7,10 @@ const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [usingFallback, setUsingFallback] = useState(false);
+  const [backendStatus, setBackendStatus] = useState('checking'); // 'checking', 'connected', 'disconnected'
 
   // Prevent double-fetch in React 18 StrictMode (dev)
   const didFetchRef = useRef(false);
-  const notifiedFallbackRef = useRef(false);
 
   useEffect(() => {
     if (didFetchRef.current) return;
@@ -23,40 +22,20 @@ const ProductsPage = () => {
     try {
       setLoading(true);
       setError(null);
+      setBackendStatus('checking');
       
-      // Try to fetch from our backend first
+      // Try to fetch from our backend
       const response = await productsAPI.getAll();
       setProducts(response.data);
-      setUsingFallback(false);
+      setBackendStatus('connected');
+      toast.success('✅ Connected to Vibe Commerce backend!');
       
     } catch (error) {
-      console.error('Error fetching from backend, trying fallback:', error);
-      
-      try {
-        // If backend fails, try fallback API
-        const fallbackResponse = await fallbackAPI.getProducts();
-        const fallbackProducts = fallbackResponse.data.map(product => ({
-          _id: product.id,
-          name: product.title,
-          price: product.price,
-          image: product.image,
-          description: product.description,
-          category: product.category,
-          stock: Math.floor(Math.random() * 50) + 10 // Random stock for demo
-        }));
-        
-        setProducts(fallbackProducts);
-        setUsingFallback(true);
-        if (!notifiedFallbackRef.current) {
-          toast.info('Using demo data - backend unavailable');
-          notifiedFallbackRef.current = true;
-        }
-        
-      } catch (fallbackError) {
-        console.error('Both APIs failed:', fallbackError);
-        setError('Failed to load products. Please try again later.');
-        toast.error('Failed to load products');
-      }
+      console.error('Error fetching from backend:', error);
+      setError('Unable to connect to Vibe Commerce backend. Please make sure the backend server is running on port 5001.');
+      setBackendStatus('disconnected');
+      setProducts([]);
+      toast.error('❌ Backend server not available. Please start the backend server.');
     } finally {
       setLoading(false);
     }
@@ -80,20 +59,28 @@ const ProductsPage = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
+        <div className="text-center max-w-md mx-auto p-8">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Failed to Load Products</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={handleRetry}
-            className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors"
-          >
-            Try Again
-          </button>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Backend Server Not Running</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <div className="space-y-3">
+            <button
+              onClick={handleRetry}
+              className="w-full bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 transition-colors"
+            >
+              🔄 Try Again
+            </button>
+            <div className="text-left bg-gray-100 p-4 rounded-md">
+              <p className="text-sm font-medium text-gray-900 mb-2">To start the backend:</p>
+              <code className="text-xs text-gray-700 bg-white p-2 rounded block">
+                cd backend && npm start
+              </code>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -111,10 +98,10 @@ const ProductsPage = () => {
             Explore our curated collection of high-quality products at unbeatable prices
           </p>
           
-          {usingFallback && (
-            <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-md max-w-md mx-auto">
-              <p className="text-sm text-yellow-800">
-                ⚠️ Currently showing demo data. Backend is unavailable.
+          {backendStatus === 'connected' && (
+            <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-md max-w-md mx-auto">
+              <p className="text-sm text-green-800">
+                ✅ Connected to Vibe Commerce backend ({products.length} products)
               </p>
             </div>
           )}

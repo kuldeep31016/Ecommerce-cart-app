@@ -10,6 +10,7 @@ const CategoryPage = () => {
   const [error, setError] = useState(null);
   const [sortBy, setSortBy] = useState('featured');
   const [priceRange, setPriceRange] = useState('all');
+  const [backendStatus, setBackendStatus] = useState('checking');
 
   useEffect(() => {
     fetchCategoryProducts();
@@ -19,9 +20,11 @@ const CategoryPage = () => {
     try {
       setLoading(true);
       setError(null);
+      setBackendStatus('checking');
       
       const response = await productsAPI.getAll();
       let filteredProducts = response.data;
+      setBackendStatus('connected');
 
       // Filter by category
       if (category && category !== 'all') {
@@ -70,7 +73,9 @@ const CategoryPage = () => {
       setProducts(filteredProducts);
     } catch (error) {
       console.error('Error fetching category products:', error);
-      setError('Failed to load products');
+      setError('Unable to connect to Vibe Commerce backend. Please make sure the backend server is running on port 5001.');
+      setBackendStatus('disconnected');
+      setProducts([]);
     } finally {
       setLoading(false);
     }

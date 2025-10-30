@@ -35,11 +35,23 @@ api.interceptors.response.use(
 
 // Products API
 export const productsAPI = {
-  // Get all products
-  getAll: () => api.get('/products'),
+  // Get all products with optional filters
+  getAll: (params = {}) => {
+    const searchParams = new URLSearchParams();
+    if (params.category) searchParams.append('category', params.category);
+    if (params.minPrice) searchParams.append('minPrice', params.minPrice);
+    if (params.maxPrice) searchParams.append('maxPrice', params.maxPrice);
+    if (params.sort) searchParams.append('sort', params.sort);
+    
+    const queryString = searchParams.toString();
+    return api.get(`/products${queryString ? `?${queryString}` : ''}`);
+  },
   
   // Get single product
   getById: (id) => api.get(`/products/${id}`),
+  
+  // Get all categories
+  getCategories: () => api.get('/products/categories'),
 };
 
 // Cart API
@@ -67,11 +79,6 @@ export const checkoutAPI = {
   
   // Get order by receipt ID
   getOrder: (receiptId) => api.get(`/checkout/orders/${receiptId}`),
-};
-
-// Fallback API for when backend is unavailable
-export const fallbackAPI = {
-  getProducts: () => axios.get('https://fakestoreapi.com/products?limit=10'),
 };
 
 export default api;

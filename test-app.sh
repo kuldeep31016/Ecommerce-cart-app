@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🔍 Testing Vibe Commerce Application..."
+echo "�️ Testing Vibe Commerce Application (Enhanced E-commerce Platform)..."
 echo ""
 
 # Test if MongoDB is running
