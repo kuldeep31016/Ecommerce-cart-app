@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { productsAPI } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import { toast } from 'react-toastify';
 
 const ProductsPage = () => {
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('search') || '';
   const [products, setProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]); // Store all products for filtering
   const [categories, setCategories] = useState([]);
@@ -21,14 +24,26 @@ const ProductsPage = () => {
     fetchProductsAndCategories();
   }, []);
 
-  // Filter products when category changes
+  // Filter products when category or search changes
   useEffect(() => {
-    if (selectedCategory === 'all') {
-      setProducts(allProducts);
-    } else {
-      setProducts(allProducts.filter(product => product.category === selectedCategory));
+    let filtered = allProducts;
+    
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(product => product.category === selectedCategory);
     }
-  }, [selectedCategory, allProducts]);
+    
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter(product => 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    setProducts(filtered);
+  }, [selectedCategory, allProducts, searchQuery]);
 
   const fetchProductsAndCategories = async () => {
     try {
@@ -112,10 +127,13 @@ const ProductsPage = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Discover Amazing Products
+            {searchQuery ? `Search Results for "${searchQuery}"` : 'Discover Amazing Products'}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Explore our curated collection of high-quality products at unbeatable prices
+            {searchQuery 
+              ? `Found ${products.length} product${products.length !== 1 ? 's' : ''} matching your search`
+              : 'Explore our curated collection of high-quality products at unbeatable prices'
+            }
           </p>
           
           {backendStatus === 'connected' && (

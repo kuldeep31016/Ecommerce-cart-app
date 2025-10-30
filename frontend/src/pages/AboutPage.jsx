@@ -98,76 +98,136 @@ const AboutPage = () => {
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-primary-600 mb-2">100K+</div>
-              <div className="text-gray-600">Orders Delivered</div>
+              <div className="text-gray-600">Products Sold</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-primary-600 mb-2">1000+</div>
-              <div className="text-gray-600">Products Available</div>
+              <div className="text-4xl font-bold text-primary-600 mb-2">4.8/5</div>
+              <div className="text-gray-600">Average Rating</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-primary-600 mb-2">99.9%</div>
-              <div className="text-gray-600">Uptime</div>
+              <div className="text-4xl font-bold text-primary-600 mb-2">24/7</div>
+              <div className="text-gray-600">Support Available</div>
             </div>
           </div>
         </div>
 
-        {/* Team Section */}
+        {/* Monthly Sales Chart */}
+        <div className="mb-16 bg-white rounded-2xl shadow-lg p-8">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">Monthly Sales Growth</h2>
+          <div className="flex items-end justify-between h-64 gap-4">
+            {[
+              { month: 'Jan', sales: 12500, height: '40%' },
+              { month: 'Feb', sales: 15800, height: '50%' },
+              { month: 'Mar', sales: 18200, height: '58%' },
+              { month: 'Apr', sales: 21000, height: '67%' },
+              { month: 'May', sales: 24500, height: '78%' },
+              { month: 'Jun', sales: 28000, height: '89%' },
+              { month: 'Jul', sales: 31400, height: '100%' },
+            ].map((data) => (
+              <div key={data.month} className="flex-1 flex flex-col items-center">
+                <div className="w-full bg-gradient-to-t from-primary-600 to-primary-400 rounded-t-lg transition-all hover:opacity-80" 
+                     style={{ height: data.height }}>
+                </div>
+                <div className="mt-2 text-sm font-medium text-gray-700">{data.month}</div>
+                <div className="text-xs text-gray-500">${(data.sales / 1000).toFixed(1)}K</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-gray-600 mt-6">
+            📈 We've seen <span className="font-bold text-primary-600">151% growth</span> in sales over the past 7 months!
+          </p>
+        </div>
+
+        {/* Customer Reviews */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Meet Our Team</h2>
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">What Our Customers Say</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <img 
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face" 
-                alt="CEO" 
-                className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
-              />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">John Smith</h3>
-              <p className="text-primary-600 mb-3">CEO & Founder</p>
-              <p className="text-gray-600">Passionate about creating exceptional shopping experiences and building lasting customer relationships.</p>
-            </div>
-            <div className="text-center">
-              <img 
-                src="https://images.unsplash.com/photo-1494790108755-2616b78e1c84?w=300&h=300&fit=crop&crop=face" 
-                alt="CTO" 
-                className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
-              />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Sarah Johnson</h3>
-              <p className="text-primary-600 mb-3">CTO</p>
-              <p className="text-gray-600">Leading our technology vision to create the most intuitive and secure shopping platform.</p>
-            </div>
-            <div className="text-center">
-              <img 
-                src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop&crop=face" 
-                alt="Head of Customer Experience" 
-                className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
-              />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Mike Chen</h3>
-              <p className="text-primary-600 mb-3">Head of Customer Experience</p>
-              <p className="text-gray-600">Ensuring every customer interaction exceeds expectations and builds trust in our brand.</p>
-            </div>
+            {[
+              {
+                name: 'Sarah Johnson',
+                role: 'Verified Buyer',
+                rating: 5,
+                review: 'Amazing products and super fast delivery! The quality exceeded my expectations. I\'ve already recommended Vibe Commerce to all my friends.',
+                avatar: 'https://i.pravatar.cc/150?img=1',
+                product: 'iPhone 15 Pro Max'
+              },
+              {
+                name: 'Michael Chen',
+                role: 'Regular Customer',
+                rating: 5,
+                review: 'Best online shopping experience I\'ve ever had. The customer service is outstanding and the prices are unbeatable. Will definitely shop here again!',
+                avatar: 'https://i.pravatar.cc/150?img=12',
+                product: 'Wireless Headphones'
+              },
+              {
+                name: 'Emily Davis',
+                role: 'Fashion Enthusiast',
+                rating: 5,
+                review: 'Love the variety of products available! The website is easy to navigate and checkout was seamless. Got my order within 2 days. Highly recommend!',
+                avatar: 'https://i.pravatar.cc/150?img=5',
+                product: 'Designer Handbag'
+              },
+              {
+                name: 'David Rodriguez',
+                role: 'Tech Lover',
+                rating: 5,
+                review: 'Found exactly what I was looking for at a great price. The product descriptions are accurate and helpful. Five stars all the way!',
+                avatar: 'https://i.pravatar.cc/150?img=8',
+                product: 'Smart Watch'
+              },
+              {
+                name: 'Jessica Williams',
+                role: 'Home Decor Fan',
+                rating: 5,
+                review: 'Excellent quality products and fantastic customer support. They answered all my questions promptly. This is now my go-to online store!',
+                avatar: 'https://i.pravatar.cc/150?img=9',
+                product: 'Stainless Steel Water Bottle'
+              },
+              {
+                name: 'James Anderson',
+                role: 'Fitness Enthusiast',
+                rating: 5,
+                review: 'Great prices, fast shipping, and quality products. What more could you ask for? Vibe Commerce has earned a loyal customer in me!',
+                avatar: 'https://i.pravatar.cc/150?img=14',
+                product: 'Organic Cotton T-Shirt'
+              }
+            ].map((review, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div className="flex items-center mb-4">
+                  <img src={review.avatar} alt={review.name} className="w-12 h-12 rounded-full mr-4" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{review.name}</h4>
+                    <p className="text-sm text-gray-500">{review.role}</p>
+                  </div>
+                </div>
+                <div className="flex items-center mb-3">
+                  {[...Array(review.rating)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-gray-600 mb-3">{review.review}</p>
+                <div className="text-sm text-primary-600 font-medium">
+                  Purchased: {review.product}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Contact CTA */}
+        {/* CTA Section */}
         <div className="text-center bg-gradient-to-r from-primary-600 to-purple-600 rounded-2xl p-8 text-white">
           <h2 className="text-3xl font-bold mb-4">Ready to Start Shopping?</h2>
           <p className="text-xl text-primary-100 mb-8">
-            Join thousands of satisfied customers and discover amazing products today.
+            Join thousands of satisfied customers and discover amazing deals today!
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              to="/" 
-              className="bg-white text-primary-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
-            >
-              Browse Products
-            </Link>
-            <a 
-              href="mailto:hello@vibecommerce.com" 
-              className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-white hover:text-primary-600 transition-colors"
-            >
-              Contact Us
-            </a>
-          </div>
+          <Link
+            to="/"
+            className="inline-block bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+          >
+            Browse Products
+          </Link>
         </div>
       </div>
     </div>
