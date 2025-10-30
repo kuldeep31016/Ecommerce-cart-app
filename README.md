@@ -2,7 +2,31 @@
 
 A modern, responsive full-stack e-commerce application built with React, Node.js, Express, and MongoDB. This project demonstrates a complete shopping cart implementation with product catalog, cart management, and mock checkout functionality.
 
-![Vibe Commerce](https://via.placeholder.com/800x400?text=Vibe+Commerce+-+E-Commerce+App)
+## 🎥 Demo Video
+
+> Click below to watch the full demo walkthrough of the **Vibe Commerce App** on YouTube 👇  
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=M3DgnoE17D4" target="_blank">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" 
+         alt="Watch on YouTube" width="180" />
+  </a>
+</p>
+
+
+## 📸 Screenshots
+
+### 🏠 Homepage
+![Homepage](./Screenshots/image1.png)
+
+### 🛍️ Product Details
+![Product Details](./Screenshots/image2.png)
+
+### 🛒 Cart
+![Cart](./Screenshots/image3.png)
+
+### 💳 Checkout
+![Checkout](./Screenshots/image4.png)
 
 ## 🌟 Features
 
